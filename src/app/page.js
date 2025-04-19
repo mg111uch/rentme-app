@@ -13,14 +13,14 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
-// import Grid from '@mui/material/Grid';
 
 export default function Home() {
  
   const [table, setTable] = React.useState([]);  
+
+  const API_KEY = process.env.MY_API_KEY
+  const SHEET_ID = process.env.MY_SHEET_ID
   
-  const SHEET_ID = '1u-QIUZT6b09gkj3xf4u9KRpRprkUn4PTAaOl9G5fitU'; 
-  const API_KEY = 'AIzaSyDTBUXGrjE-BmYeONaAsBd56qGPeTGHF8c';
   const range = 'Sheet1!A:C'; 
 
   const API_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
