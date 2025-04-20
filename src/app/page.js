@@ -13,14 +13,14 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
+// import 'dotenv/config'
 
-export default function Home() {
+export default function Home() { 
  
   const [table, setTable] = React.useState([]);  
 
-  const API_KEY = process.env.MY_API_KEY
-  const SHEET_ID = process.env.MY_SHEET_ID
-  
+  const API_KEY = process.env.NEXT_PUBLIC_API_KEY
+  const SHEET_ID = process.env.NEXT_PUBLIC_SHEET_ID
   const range = 'Sheet1!A:C'; 
 
   const API_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
