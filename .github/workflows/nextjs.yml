@@ -35,10 +35,9 @@ jobs:
         env:
           MY_API_KEY: ${{ secrets.RENTME_API_KEY }}
           # MY_SHEET_ID: ${{ secrets.RENTME_SHEET_ID }}
-        run: 
+        run: |
           echo ${{ secrets.RENTME_API_KEY }}
           echo "Using API key as $MY_API KEY"
-          # echo "Using API key and sheet id"
   #     - name: Detect package manager
   #       id: detect-package-manager
   #       run: |
