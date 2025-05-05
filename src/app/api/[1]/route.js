@@ -3,6 +3,8 @@ import { open, Database } from "sqlite";
 
 let db = null;
 
+export async function generateStaticParams() {}
+
 export async function POST(req, res) {
   if (!db) {
     db = await open({
