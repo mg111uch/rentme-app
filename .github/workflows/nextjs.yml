@@ -33,11 +33,9 @@ jobs:
         uses: actions/checkout@v4
       - name: Use API key
         env:
-          NEXT_PUBLIC_API_KEY: ${{ secrets.RENTME_API_KEY }}
-          NEXT_PUBLIC_SHEET_ID: ${{ secrets.RENTME_SHEET_ID }}
+          NEXT_PUBLIC_WEBAPP_URL: ${{ secrets.WEBAPP_URL }}
         run: |
-          echo "My API key is: ${{ secrets.RENTME_API_KEY }}"
-          echo "Using Next API key : $NEXT_PUBLIC_API_KEY"
+          echo "My API key is: ${{ secrets.WEBAPP_URL }}"
       - name: Detect package manager
         id: detect-package-manager
         run: |
