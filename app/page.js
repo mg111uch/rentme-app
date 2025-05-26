@@ -22,22 +22,9 @@ import SyncIcon from '@mui/icons-material/Sync';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import Favorite from '@mui/icons-material/Favorite';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import MoreVertOutlinedIcon from '@mui/icons-material/MoreVertOutlined';
 import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
-import DiamondIcon from '@mui/icons-material/Diamond';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import EjectIcon from '@mui/icons-material/Eject';
-import ExtensionIcon from '@mui/icons-material/Extension';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
-import HiveIcon from '@mui/icons-material/Hive';
-import HotelClassIcon from '@mui/icons-material/HotelClass';
-import HubIcon from '@mui/icons-material/Hub';
-import SmartphoneIcon from '@mui/icons-material/Smartphone';
-import NearMeIcon from '@mui/icons-material/NearMe';
-import StarHalfIcon from '@mui/icons-material/StarHalf';
-import OfflineBoltIcon from '@mui/icons-material/OfflineBolt';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
-import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 const defaultuserid = 'As Guest User'
@@ -48,12 +35,12 @@ const tableheader = ['Timestamp',"Title","Description","Property Address",
   "Rental Price","Like Status","Type"]
 const categories = ['Flat','Hostel','Villa','Shop','Factory']
 const formlength = {title:30,description:70,address:30,locality:15,
-  city:12,ownername:25,phoneno:10,price:10,password:20}  
+  city:12,ownername:25,phoneno:10,price:10,password:20,feedback:280}  
 const featureslist = [
   'Free to use service for all Indian rental place seekers.',
   'Owners must provide login name and phone as on your Aadhar Card for Address proof.',
   'Do not repeat information in Description that you have already mentioned in the Title.',
-  'Only one place can be listed by a owner in free tier service. Paid plan with more limits launching soon.',
+  'Only 3 places can be listed by a owner in free tier service. Paid plan with more limits launching soon.',
   'New Posts may take upto one hour to show up on homepage due to low budget.',
   'List can be refreshed with an interval of 15 minutes.',
   'Reload resets the like sign but they are saved in favourites.',
@@ -118,6 +105,8 @@ export default function Home() {
   const [userreload, setUserReload] = React.useState(false);
   const [homereloadtime, setHomeReloadTime] = React.useState(Date.now());
   const [userreloadtime, setUserReloadTime] = React.useState(Date.now());
+  const [rating, setRating] = React.useState(5); 
+  const [feedback, setFeedback] = React.useState(''); 
   
   const APP_URL = process.env.NEXT_PUBLIC_WEBAPP_URL
   // const APP_URL = process.env.NEXT_PUBLIC_LOCAL_URL
@@ -197,15 +186,16 @@ export default function Home() {
     setShowForm(false); setShowUser(false); setShowFilterform(false); setShowFilter(false)
     setShowRating(false); setShowFav(false); setShowFeatures(false); 
     if (homerows.length==0 || homereload){
-      console.log('Fetching Home rows from DB')        
+      // console.log('Fetching Home rows from DB')        
       var rowdata = await accessAPI({ command: 'read', payload: { currentrow: 0 , filterby:'', range:'' } })     
-      console.log('Setting Local storage for Home rows')
+      // console.log('Setting Local storage for Home rows')
       localStorage.setItem('RentMe:HomeRows',JSON.stringify(rowdata))
       setTotalHomeRows(rowdata.pop())
       if(rowdata.length > rowsperpage){
-        console.log('Slicing rowData'); setHomeRows(rowdata.slice(0,rowsperpage))
+        // console.log('Slicing rowData'); 
+        setHomeRows(rowdata.slice(0,rowsperpage))
       }else{ setHomeRows(rowdata) }  
-      if(homereload){console.log('Home Reload');setHomeReloadTime(Date.now()); setHomeReload(false)}           
+      if(homereload){setHomeReloadTime(Date.now()); setHomeReload(false)}           
     }
     setToEdit([]); setShowHome(true);     
   }
@@ -226,7 +216,7 @@ export default function Home() {
           filterby:{ ownername: ownername },range:'' } } )     
       if(rowdata.length != 0){ setTotalUserRows(rowdata.pop()); setUserRows(rowdata)} 
       else{ setSnackbar('No listed Places..!!') }
-      if(userreload){ console.log('User Reload'); setUserReloadTime(Date.now()); setUserReload(false)} 
+      if(userreload){  setUserReloadTime(Date.now()); setUserReload(false)} 
     }       
     setToEdit([]);
   }
@@ -237,23 +227,30 @@ export default function Home() {
     setShowFilterform(true);     
   }
   const handleRating = (e) => {  
-    console.log('Rating clicked')
+    setRating(5); setFeedback('');
     setShowHome(false);setShowForm(false);setShowUser(false); setShowFilterform(false); setShowFilter(false)
     setShowFav(false); setShowFeatures(false); setShowRating(true)
   }
   const handleFavorites = (e) => {    
     var currentValues = localStorage.getItem('RentMe:Favorites:Values'); 
-    const rowsarray = JSON.parse('[' + currentValues + ']')
-    setFavRows(rowsarray);
+    if(currentValues){
+      const rowsarray = JSON.parse('[' + currentValues + ']')
+      setFavRows(rowsarray);
+    }
     setShowHome(false); setShowForm(false); setShowUser(false); setShowFilterform(false); setShowFilter(false)
     setShowRating(false);setShowFeatures(false);setShowFav(true)
   }   
   const handleFeatures = (e) => {  
-    console.log('Features clicked')
     setShowHome(false); setShowForm(false); setShowUser(false); setShowFilterform(false); setShowFilter(false)
     setShowRating(false);setShowFav(false);setShowFeatures(true);
   }
-  
+  const handleFeedbackSubmit = async(e) => {
+    const response = await accessAPI({ 
+      command: 'feedback',
+      payload: { ownername: ownername,phoneno: phoneno,rating:rating,feedback:feedback}
+    })
+    setSnackbar('Thanks You..!!')
+  }
   const handleRemoveFilters = (e) => { setShowFilter(false); setShowHome(true); setFilterHeaders([]) ;setSnackbar('Filters removed..!!')}
   const handleDialogOpen = (e) => { handleMenuClose3();handleMenuClose5() ; setDialogOpen(true);}
   const handleLogOut = (e) => { 
@@ -276,7 +273,7 @@ export default function Home() {
 // ------------------------------------------------------------------------------------------
   React.useEffect(() => {   
     const UserLogInCredentials = localStorage.getItem('UserLogInCredentials') 
-    console.log(UserLogInCredentials)
+    // console.log(UserLogInCredentials)
     if(UserLogInCredentials){
       const UserJson = JSON.parse(UserLogInCredentials)
       setOwnerName(UserJson.ownername); setPhoneNo(UserJson.phoneno)
@@ -301,7 +298,8 @@ export default function Home() {
             else{setFetchRows(true)}
           }
         }else{
-          console.log('Fetched more rows'); setMoreRowsLoading(true)          
+          console.log('Fetched more rows'); 
+          setMoreRowsLoading(true)          
           const morerows = await accessAPI({command: 'read',
             payload: {currentrow: homerows.length ,filterby:'', range:'' }})
           const newlocalrows = [...localrowData, ...morerows]         
@@ -433,18 +431,21 @@ export default function Home() {
         if(toEdit.length>0){          
           const updateData = [timestamp, ...rowData]
           const response = await accessAPI({command:'update',payload:{ toUpdate: updateData } })
-          if(response[0] == 'Values updated.'){                 
-            setUserRows((prev) => [...prev.filter((i) => i[0] !== toEdit[0])])
-            setUserRows((prev) => [updateData, ...prev])
+          if(response[0] == 'Values updated.'){  
+            var rowsuser = userrows.filter((i) => i[0] !== toEdit[0])  
+            rowsuser.push(updateData)        
+            setUserRows(rowsuser)
+            setTotalUserRows(rowsuser.length)
             setToEdit([]);setSnackbar('Successfully Updated !!');
           }else{setSnackbar('Error Updating Items !!')}
         }else{
-          if(totaluserrows < 4){
+          if(totaluserrows < 3){
             const newData = [Date.now(), ...rowData]
             const response =  await accessAPI({command:'create',payload:{ toCreate: newData } })
             if(response[0] == 'Data created.'){
-              // setUserReload(true); handleUserPage()              
-              setUserRows([...userrows, ...[newData] ])
+              const rowsuser = [...userrows, newData ]            
+              setUserRows(rowsuser)
+              setTotalUserRows(rowsuser.length)
               setSnackbar('Successfully Created !!');
             }else{setSnackbar('Error Creating Items !!')}
           }else{setSnackbar('Maximum 3 listed places..!!')}
@@ -458,7 +459,7 @@ export default function Home() {
         const filterHeaderNames = ['Locality : ','City : ','Type : ','Price from : ','Price to : ']
         const isNonEmptyValue = filterArray.some( item => item != '' )
         if(isNonEmptyValue){
-          console.log(filterArray)
+          // console.log(filterArray)
           setShowFilterform(false); setShowFilter(true);
           var filterTableHeader = []
           for(let i=0; i<filterArray.length; i++){
@@ -466,7 +467,7 @@ export default function Home() {
               filterTableHeader.push(filterHeaderNames[filterArray.indexOf(filterArray[i])]+filterArray[i])
             }
           }
-          console.log(filterTableHeader)
+          // console.log(filterTableHeader)
           setFilterHeaders(filterTableHeader)
           var filterdata = await accessAPI({ 
             command: 'read',
@@ -514,20 +515,21 @@ export default function Home() {
             <Typography noWrap align="center" variant="h6" sx={{ mt:0.5,fontStyle: 'italic',fontSize: 20, fontFamily: 'Monospace',letterSpacing: 1.5 }}>RentMe</Typography>
             <Stack direction="row" spacing={0.5} sx={{ marginLeft: 'auto' }}>
               { !showhome 
-                ? <IconButton onClick={handleMenuOpen1} aria-label="home" aria-controls="menu-appbar1" aria-haspopup="true" size="small">
+                ? <IconButton onClick={handleMenuOpen1} aria-controls="menu-appbar1" size="small">
                     <HomeIcon /></IconButton> : null}
               { showhome
-                ? <IconButton onClick={handleMenuOpen2} aria-label="filter" aria-controls="menu-appbar2" aria-haspopup="true" size="small">
+                ? <IconButton onClick={handleMenuOpen2} aria-controls="menu-appbar2" size="small">
                     <FilterAltIcon /></IconButton>: null}
               { !showform 
-                ? <IconButton onClick={handleMenuOpen3} aria-label="form" aria-controls="menu-appbar3" aria-haspopup="true" size="small">
+                ? <IconButton onClick={handleMenuOpen3} aria-controls="menu-appbar3" size="small">
                     <AddIcon /></IconButton> : null}
               { loginStatus && !showuser 
-                ? <IconButton onClick={handleMenuOpen4} aria-label="fetch" aria-controls="menu-appbar4" aria-haspopup="true" size="small">
+                ? <IconButton onClick={handleMenuOpen4} aria-controls="menu-appbar4" size="small">
                     <DensityMediumIcon /></IconButton> : null}
               { loginStatus 
-                ? <IconButton onClick={handleMenuOpen5} aria-label="login" aria-controls="menu-appbar5" aria-haspopup="true" size="small">
+                ? <IconButton onClick={handleMenuOpen5} aria-controls="menu-appbar5" size="small">
                     <AccountCircleIcon /></IconButton>: null}
+                     {/* aria-label="home""filter""form""fetch""login" aria-haspopup="true"  */}
             </Stack></Toolbar></AppBar></ThemeProvider>
       </Box>
 
@@ -549,8 +551,8 @@ export default function Home() {
         </DialogTitle>
         {dialogPage == 1    
         ? <DialogContent><Stack spacing={2} sx={{ justifyContent: 'center' }}>
-            <Button onClick={()=>{console.log('NewAccount');setNewUser(true);setDialogPage(2)}} variant="outlined" size="small" >New Account</Button>
-            <Button onClick={()=>{console.log('ExistingAccount');setNewUser(false);setDialogPage(2)}} variant="outlined" size="small" >Existing User</Button>
+            <Button onClick={()=>{setNewUser(true);setDialogPage(2)}} variant="outlined" size="small" >New Account</Button>
+            <Button onClick={()=>{setNewUser(false);setDialogPage(2)}} variant="outlined" size="small" >Existing User</Button>
             <Button onClick={()=>{setDialogOpen(false);setChecked(false);setDialogPage(1);setNewUser(false)}} variant="text" size="small" >Close</Button></Stack></DialogContent>
         : <><DialogContent>
             <TextField required fullWidth onChange={(e) => setEnterName(e.target.value)} id="text1" label="Owner name" variant="standard" size="small" slotProps={{ htmlInput: { maxLength: formlength.locality }, input: { endAdornment:<InputAdornment position="end">{entername.length} / {formlength.ownername}</InputAdornment> }}}></TextField>
@@ -567,7 +569,7 @@ export default function Home() {
 
       <Backdrop open={progress} onClick={()=>{setProgress(false)}}>
         <CircularProgress color="inherit" /></Backdrop>
-      <Snackbar open={snackbar!=''} autoHideDuration={5000} onClose={()=>{setSnackbar('')}} message={snackbar} action={action} />
+      <Snackbar open={snackbar!=''} autoHideDuration={3000} onClose={()=>{setSnackbar('')}} message={snackbar} action={action} />
       
       <Typography noWrap align="center" sx={{ml:2, fontSize: text_medium }}>{loginStatus ? ownername+' @'+phoneno : defaultuserid}</Typography> 
         
@@ -577,13 +579,23 @@ export default function Home() {
       { showuser && <DrawComponents rows={userrows}></DrawComponents>}
       { showfilter && <DrawComponents rows={filterrows}></DrawComponents>}
 
-      { showrating && <Box sx={{p:2,mt:1,bgcolor:'lightgray'}}><Typography align="center" sx={{ mb:1,fontSize: text_large, fontStyle:'bold',color:'text.primary' }}>Rating and Feedback</Typography>
-                            <Box align="center" ><Rating  onChange={(event, newValue) => {console.log(newValue);}} name="customized-10" defaultValue={5} max={10} size='large'/></Box></Box>}
+      { showrating && <Box sx={{p:2,mt:1,bgcolor:'lightgray'}}>
+        <Typography align="center" sx={{ mb:1,fontSize: text_large, fontStyle:'bold',color:'text.primary' }}>Rating and Feedback</Typography>
+          <Box align="center" ><Rating  onChange={(event, newValue) => {setRating(newValue);}} name="customized-10" value={rating} max={10} size='large'/></Box>
+          <TextField variant="outlined" label='Suggestions and Improvements' value={feedback} onChange={(e) => {setFeedback(e.target.value)}} id='Feedback' multiline sx={{ mb:1 ,mt:2}} fullWidth size="small" slotProps={{ htmlInput: { maxLength: formlength.feedback }}}></TextField>
+          <Typography align="right" sx={{ fontSize: text_medium, fontStyle:'bold',color:'text.secondary' }}>{feedback.length} / {formlength.feedback}</Typography>
+          <Box align='center' ><Button onClick={handleFeedbackSubmit} variant="contained" endIcon={<SendIcon />} size="small" sx={{ mt:1 }}>Submit</Button></Box>
+          <Typography align="center" sx={{ mb:1,mt:5,fontSize: text_large, fontStyle:'bold',color:'text.primary' }}>Contact</Typography>
+          <Typography align="center" sx={{ fontSize: text_small, fontStyle:'bold',color:'text.secondary' }}>Manish Gupta, 9129065824</Typography>
+          <Typography align="center" sx={{ fontSize: text_small, fontStyle:'bold',color:'text.secondary' }}>guptamanish317@gmail.com</Typography>
+          <Typography align="center" sx={{ fontSize: text_small, fontStyle:'bold',color:'text.secondary' }}>Kanpur, Uttar Pradesh</Typography>
+      </Box>}
       { showfeatures && <Box sx={{p:2,mt:1,bgcolor:'lightgray'}}><Typography align="center" sx={{ mb:1,fontSize: text_large , fontStyle:'bold',color:'text.primary'}}>Features & Instructions</Typography>
                             <List>
                               {featureslist.map(feature =>
                               <ListItem disablePadding key={generateRandomString(8)} >
-                                <Box sx={{width: '100%'}}><Typography sx={{ fontSize: text_medium,color:'text.secondary' }}>{feature}</Typography>
+                                <Box sx={{width: '100%'}}><Typography sx={{ fontSize: text_small,color:'text.secondary' }}>
+                                  <FlashOnIcon sx={{pt:0.5}} color='primary' fontSize='medium'/>{feature}</Typography>
                                 <Divider sx={{pt:0.5,width: '100%'}}/></Box></ListItem>)}
                             </List></Box>}
       
